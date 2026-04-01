@@ -1,0 +1,8 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^Set-Location C:\\\\Users\\\\franc\\\\OneDrive\\\\Desktop\\\\DEV\\\\MyTraining; \\$envPath='C:\\\\Users\\\\franc\\\\OneDrive\\\\Desktop\\\\DEV\\\\MyTraining\\\\BE\\\\\\.env'; Get-Content \\$envPath \\| Where-Object \\{ \\$_ -match '=' \\} \\| ForEach-Object \\{ \\$k,\\$v = \\$_ -split '=',2; \\[Environment\\]::SetEnvironmentVariable\\(\\$k,\\$v,'Process'\\) \\}; c:/Users/franc/OneDrive/Desktop/DEV/MyTraining/BE/venv/Scripts/python\\.exe -c \"from pymongo import MongoClient; import os; uri=os\\.getenv\\('MONGODB_URL'\\); db=os\\.getenv\\('MONGODB_DB_NAME','MyTraining'\\); client=MongoClient\\(uri,serverSelectionTimeoutMS=10000\\); print\\('PING_OK', client\\.admin\\.command\\('ping'\\)\\); print\\('DB_OK', db\\); print\\('COLLECTIONS', client\\[db\\]\\.list_collection_names\\(\\)\\); client\\.close\\(\\)\"$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  }
+}
