@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(source venv/Scripts/activate)",
-      "Bash(uvicorn training-types:app --reload)"
+      "Bash(uvicorn training-types:app --reload)",
+      "Bash(iconv -f UTF-16LE -t UTF-8 requirements.txt)"
     ]
   }
 }
