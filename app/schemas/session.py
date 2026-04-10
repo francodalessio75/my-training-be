@@ -1,23 +1,23 @@
 from datetime import datetime
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 from app.schemas.workout_unit import WorkoutUnitResponse, WorkoutUnitSummaryResponse
 
 
-class SessionCreate(BaseModel):
+class SessionCreate(CamelModel):
     name: str
     date: datetime
     total_load_description: str
     notes: str | None = None
 
 
-class SessionUpdate(BaseModel):
+class SessionUpdate(CamelModel):
     name: str | None = None
     date: datetime | None = None
     total_load_description: str | None = None
     notes: str | None = None
 
 
-class SessionResponse(BaseModel):
+class SessionResponse(CamelModel):
     id: str
     user_id: str
     name: str
@@ -29,7 +29,7 @@ class SessionResponse(BaseModel):
     updated_at: datetime
 
 
-class SessionListItemResponse(BaseModel):
+class SessionListItemResponse(CamelModel):
     id: str
     name: str
     date: datetime

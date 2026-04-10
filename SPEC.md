@@ -42,28 +42,28 @@
 
 ### Core Stack
 
-| Concern | Technology |
-|---|---|
-| Language | Python 3.12+ |
-| Framework | FastAPI |
-| ODM | Beanie (async, Pydantic v2) |
-| Database | MongoDB Atlas |
-| Authentication | JWT (OAuth2 Password Bearer) |
-| Containerization | Docker + Docker Compose |
+| Concern          | Technology                   |
+| ---------------- | ---------------------------- |
+| Language         | Python 3.12+                 |
+| Framework        | FastAPI                      |
+| ODM              | Beanie (async, Pydantic v2)  |
+| Database         | MongoDB Atlas                |
+| Authentication   | JWT (OAuth2 Password Bearer) |
+| Containerization | Docker + Docker Compose      |
 
 ### Key Libraries
 
-| Library | Purpose |
-|---|---|
-| `fastapi` | Web framework |
-| `uvicorn` | ASGI server |
-| `beanie` | MongoDB ODM (built on Motor + Pydantic v2) |
-| `pydantic` | Data validation and serialization |
-| `pydantic-settings` | Environment variables management |
-| `python-jose` | JWT encoding / decoding |
-| `passlib` | Password hashing (bcrypt) |
-| `python-multipart` | Form data support (required by FastAPI OAuth2) |
-| `motor` | Async MongoDB driver (used by Beanie internally) |
+| Library             | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
+| `fastapi`           | Web framework                                    |
+| `uvicorn`           | ASGI server                                      |
+| `beanie`            | MongoDB ODM (built on Motor + Pydantic v2)       |
+| `pydantic`          | Data validation and serialization                |
+| `pydantic-settings` | Environment variables management                 |
+| `python-jose`       | JWT encoding / decoding                          |
+| `passlib`           | Password hashing (bcrypt)                        |
+| `python-multipart`  | Form data support (required by FastAPI OAuth2)   |
+| `motor`             | Async MongoDB driver (used by Beanie internally) |
 
 ### Project Structure
 
@@ -127,6 +127,7 @@ ALLOWED_ORIGINS=http://localhost:4200
 ### Docker Setup
 
 **`Dockerfile`:**
+
 ```dockerfile
 FROM python:3.12-slim
 WORKDIR /app
@@ -137,6 +138,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 ```
 
 **`docker-compose.yml`:**
+
 ```yaml
 services:
   api:
@@ -283,28 +285,28 @@ class User(Document):
 
 ### MongoDB Document Structure Summary
 
-| Collection | Type | Notes |
-|---|---|---|
-| `training-types` | `Document` | Standalone collection |
-| `muscle-groups` | `Document` | Standalone collection |
-| `exercises` | `Document` | References `TrainingType` and `MuscleGroup` |
-| `sessions` | `Document` | Contains embedded `WorkoutUnit` list |
-| `users` | `Document` | Standalone collection |
-| `WorkoutUnit` | `BaseModel` | Embedded in `Session` |
-| `ExecutedSet` | `BaseModel` | Embedded in `WorkoutUnit` |
+| Collection       | Type        | Notes                                       |
+| ---------------- | ----------- | ------------------------------------------- |
+| `training-types` | `Document`  | Standalone collection                       |
+| `muscle-groups`  | `Document`  | Standalone collection                       |
+| `exercises`      | `Document`  | References `TrainingType` and `MuscleGroup` |
+| `sessions`       | `Document`  | Contains embedded `WorkoutUnit` list        |
+| `users`          | `Document`  | Standalone collection                       |
+| `WorkoutUnit`    | `BaseModel` | Embedded in `Session`                       |
+| `ExecutedSet`    | `BaseModel` | Embedded in `WorkoutUnit`                   |
 
 ---
 
 ### Embedding vs Referencing Decision
 
-| Relationship | Strategy | Reason |
-|---|---|---|
-| Session → WorkoutUnit | **Embedded** | Units only exist within a session, always loaded together |
-| WorkoutUnit → ExecutedSet | **Embedded** | Sets only exist within a unit, always loaded together |
-| WorkoutUnit → TrainingType | **Referenced** | Catalog data, shared across documents |
-| ExecutedSet → Exercise | **Referenced** | Catalog data, shared across documents |
-| Exercise → TrainingType | **Referenced** | Catalog data, shared across documents |
-| Exercise → MuscleGroup | **Referenced** | Catalog data, shared across documents |
+| Relationship               | Strategy       | Reason                                                    |
+| -------------------------- | -------------- | --------------------------------------------------------- |
+| Session → WorkoutUnit      | **Embedded**   | Units only exist within a session, always loaded together |
+| WorkoutUnit → ExecutedSet  | **Embedded**   | Sets only exist within a unit, always loaded together     |
+| WorkoutUnit → TrainingType | **Referenced** | Catalog data, shared across documents                     |
+| ExecutedSet → Exercise     | **Referenced** | Catalog data, shared across documents                     |
+| Exercise → TrainingType    | **Referenced** | Catalog data, shared across documents                     |
+| Exercise → MuscleGroup     | **Referenced** | Catalog data, shared across documents                     |
 
 ---
 
@@ -316,7 +318,9 @@ Base URL: `/api/v1`
 
 > **Computed fields** (`totalLoad` at set, unit, and session level) are calculated on the frontend. The API never returns nor stores them.
 
-> **Mutation response policy:** all `POST`, `PUT`, `PATCH` and `DELETE` operations on workout units and executed sets return the full `SessionResponse` (with all nested data eagerly fetched), allowing the frontend `sessionsStore` to replace the entire selected session in a single operation.
+> **Naming convention:** all API request/response payloads use `camelCase`. Backend Python/Beanie internals may remain `snake_case` and are mapped via Pydantic aliases.
+
+> **Mutation response policy:** `POST`, `PUT` and `PATCH` operations on workout units and executed sets return the full `SessionResponse` (with all nested data eagerly fetched), while `DELETE` operations return `204 No Content`. The frontend `sessionsStore` reloads the full session after each delete.
 
 ---
 
@@ -324,11 +328,11 @@ Base URL: `/api/v1`
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/auth/login` | Login, returns JWT access token |
-| POST | `/auth/refresh` | Refresh access token |
-| GET | `/auth/me` | Get current authenticated user |
+| Method | Endpoint        | Description                     |
+| ------ | --------------- | ------------------------------- |
+| POST   | `/auth/login`   | Login, returns JWT access token |
+| POST   | `/auth/refresh` | Refresh access token            |
+| GET    | `/auth/me`      | Get current authenticated user  |
 
 #### Schemas
 
@@ -355,12 +359,12 @@ class UserResponse(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/training-types` | List all training types |
-| POST | `/training-types` | Create a training type |
-| PUT | `/training-types/{id}` | Update a training type |
-| DELETE | `/training-types/{id}` | Delete a training type |
+| Method | Endpoint               | Description             |
+| ------ | ---------------------- | ----------------------- |
+| GET    | `/training-types`      | List all training types |
+| POST   | `/training-types`      | Create a training type  |
+| PUT    | `/training-types/{id}` | Update a training type  |
+| DELETE | `/training-types/{id}` | Delete a training type  |
 
 #### Schemas
 
@@ -387,12 +391,12 @@ class TrainingTypeResponse(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/muscle-groups` | List all muscle groups |
-| POST | `/muscle-groups` | Create a muscle group |
-| PUT | `/muscle-groups/{id}` | Update a muscle group |
-| DELETE | `/muscle-groups/{id}` | Delete a muscle group |
+| Method | Endpoint              | Description            |
+| ------ | --------------------- | ---------------------- |
+| GET    | `/muscle-groups`      | List all muscle groups |
+| POST   | `/muscle-groups`      | Create a muscle group  |
+| PUT    | `/muscle-groups/{id}` | Update a muscle group  |
+| DELETE | `/muscle-groups/{id}` | Delete a muscle group  |
 
 #### Schemas
 
@@ -419,40 +423,40 @@ class MuscleGroupResponse(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/exercises` | List all exercises (supports `?trainingTypeId=`, `?muscleGroupId=`) |
-| GET | `/exercises/{id}` | Get exercise detail |
-| POST | `/exercises` | Create an exercise |
-| PUT | `/exercises/{id}` | Update an exercise |
-| DELETE | `/exercises/{id}` | Delete an exercise |
+| Method | Endpoint          | Description                                                         |
+| ------ | ----------------- | ------------------------------------------------------------------- |
+| GET    | `/exercises`      | List all exercises (supports `?trainingTypeId=`, `?muscleGroupId=`) |
+| GET    | `/exercises/{id}` | Get exercise detail                                                 |
+| POST   | `/exercises`      | Create an exercise                                                  |
+| PUT    | `/exercises/{id}` | Update an exercise                                                  |
+| DELETE | `/exercises/{id}` | Delete an exercise                                                  |
 
 #### Schemas
 
 ```python
 class ExerciseCreate(BaseModel):
     name: str
-    training_type_id: str
-    muscle_group_id: str
-    execution_description: str
-    load_description: str
+    trainingTypeId: str
+    muscleGroupId: str
+    executionDescription: str
+    loadDescription: str
     notes: str | None = None
 
 class ExerciseUpdate(BaseModel):
     name: str | None = None
-    training_type_id: str | None = None
-    muscle_group_id: str | None = None
-    execution_description: str | None = None
-    load_description: str | None = None
+    trainingTypeId: str | None = None
+    muscleGroupId: str | None = None
+    executionDescription: str | None = None
+    loadDescription: str | None = None
     notes: str | None = None
 
 class ExerciseResponse(BaseModel):
     id: str
     name: str
-    training_type: TrainingTypeResponse     # fully populated
-    muscle_group: MuscleGroupResponse       # fully populated
-    execution_description: str
-    load_description: str
+    trainingType: TrainingTypeResponse     # fully populated
+    muscleGroup: MuscleGroupResponse       # fully populated
+    executionDescription: str
+    loadDescription: str
     notes: str | None = None
 ```
 
@@ -464,13 +468,13 @@ class ExerciseResponse(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/sessions` | List sessions (supports `?date=`, `?from=`, `?to=`, `?limit=`, `?skip=`) |
-| GET | `/sessions/{id}` | Get full session detail |
-| POST | `/sessions` | Create a new session |
-| PUT | `/sessions/{id}` | Update a session |
-| DELETE | `/sessions/{id}` | Delete a session |
+| Method | Endpoint         | Description                                                              |
+| ------ | ---------------- | ------------------------------------------------------------------------ |
+| GET    | `/sessions`      | List sessions (supports `?date=`, `?from=`, `?to=`, `?limit=`, `?skip=`) |
+| GET    | `/sessions/{id}` | Get full session detail                                                  |
+| POST   | `/sessions`      | Create a new session                                                     |
+| PUT    | `/sessions/{id}` | Update a session                                                         |
+| DELETE | `/sessions/{id}` | Delete a session                                                         |
 
 #### Schemas
 
@@ -478,32 +482,32 @@ class ExerciseResponse(BaseModel):
 class SessionCreate(BaseModel):
     name: str
     date: datetime
-    total_load_description: str
+    totalLoadDescription: str
     notes: str | None = None
 
 class SessionUpdate(BaseModel):
     name: str | None = None
     date: datetime | None = None
-    total_load_description: str | None = None
+    totalLoadDescription: str | None = None
     notes: str | None = None
 
 class SessionResponse(BaseModel):
     id: str
-    user_id: str
+    userId: str
     name: str
     date: datetime
-    workout_units: list[WorkoutUnitResponse]    # fully populated
-    total_load_description: str
+    workoutUnits: list[WorkoutUnitResponse]    # fully populated
+    totalLoadDescription: str
     notes: str | None = None
-    created_at: datetime
-    updated_at: datetime
+    createdAt: datetime
+    updatedAt: datetime
 
 class SessionListItemResponse(BaseModel):
     id: str
     name: str
     date: datetime
-    workout_units: list[WorkoutUnitSummaryResponse]  # name + training type only
-    total_load_description: str
+    workoutUnits: list[WorkoutUnitSummaryResponse]  # name + training type only
+    totalLoadDescription: str
 ```
 
 > `SessionListItemResponse` is a lightweight response for the session list page. `SessionResponse` is the full version returned by `GET /sessions/{id}` and all mutation endpoints.
@@ -514,36 +518,36 @@ class SessionListItemResponse(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/sessions/{sessionId}/units` | Add a workout unit |
-| PUT | `/sessions/{sessionId}/units/{unitId}` | Update a workout unit |
+| Method | Endpoint                               | Description           |
+| ------ | -------------------------------------- | --------------------- |
+| POST   | `/sessions/{sessionId}/units`          | Add a workout unit    |
+| PUT    | `/sessions/{sessionId}/units/{unitId}` | Update a workout unit |
 | DELETE | `/sessions/{sessionId}/units/{unitId}` | Remove a workout unit |
-| PATCH | `/sessions/{sessionId}/units/reorder` | Reorder workout units |
+| PATCH  | `/sessions/{sessionId}/units/reorder`  | Reorder workout units |
 
 #### Schemas
 
 ```python
 class WorkoutUnitCreate(BaseModel):
-    training_type_id: str
-    total_load_description: str
+    trainingTypeId: str
+    totalLoadDescription: str
     notes: str | None = None
 
 class WorkoutUnitUpdate(BaseModel):
-    training_type_id: str | None = None
-    total_load_description: str | None = None
+    trainingTypeId: str | None = None
+    totalLoadDescription: str | None = None
     notes: str | None = None
 
 class WorkoutUnitResponse(BaseModel):
     id: str
-    training_type: TrainingTypeResponse     # fully populated
-    executed_sets: list[ExecutedSetResponse]
-    total_load_description: str
+    trainingType: TrainingTypeResponse     # fully populated
+    executedSets: list[ExecutedSetResponse]
+    totalLoadDescription: str
     notes: str | None = None
 
 class WorkoutUnitSummaryResponse(BaseModel):
     id: str
-    training_type: TrainingTypeResponse     # for session list row
+    trainingType: TrainingTypeResponse     # for session list row
 
 class ReorderRequest(BaseModel):
     ordered_ids: list[str]                  # full list of ids in new order
@@ -555,27 +559,27 @@ class ReorderRequest(BaseModel):
 
 #### Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/sessions/{sessionId}/units/{unitId}/sets` | Add an executed set |
-| PUT | `/sessions/{sessionId}/units/{unitId}/sets/{setId}` | Update an executed set |
+| Method | Endpoint                                            | Description            |
+| ------ | --------------------------------------------------- | ---------------------- |
+| POST   | `/sessions/{sessionId}/units/{unitId}/sets`         | Add an executed set    |
+| PUT    | `/sessions/{sessionId}/units/{unitId}/sets/{setId}` | Update an executed set |
 | DELETE | `/sessions/{sessionId}/units/{unitId}/sets/{setId}` | Remove an executed set |
-| PATCH | `/sessions/{sessionId}/units/{unitId}/sets/reorder` | Reorder executed sets |
+| PATCH  | `/sessions/{sessionId}/units/{unitId}/sets/reorder` | Reorder executed sets  |
 
 #### Schemas
 
 ```python
 class ExecutedSetCreate(BaseModel):
-    exercise_id: str
+    exerciseId: str
     load: float
-    load_description: str
+    loadDescription: str
     repetitions: int
     notes: str | None = None
 
 class ExecutedSetUpdate(BaseModel):
-    exercise_id: str | None = None
+    exerciseId: str | None = None
     load: float | None = None
-    load_description: str | None = None
+    loadDescription: str | None = None
     repetitions: int | None = None
     notes: str | None = None
 
@@ -583,7 +587,7 @@ class ExecutedSetResponse(BaseModel):
     id: str
     exercise: ExerciseResponse              # fully populated
     load: float
-    load_description: str
+    loadDescription: str
     repetitions: int
     notes: str | None = None
 ```
@@ -618,13 +622,13 @@ MyTraining uses **JWT (JSON Web Token)** authentication via FastAPI's OAuth2 Pas
 
 ### JWT Configuration
 
-| Parameter | Value |
-|---|---|
-| Algorithm | `HS256` |
-| Expiry | 1 day (1440 minutes) |
-| Secret | `JWT_SECRET` environment variable |
-| Token type | Bearer |
-| Storage (frontend) | `localStorage` |
+| Parameter          | Value                             |
+| ------------------ | --------------------------------- |
+| Algorithm          | `HS256`                           |
+| Expiry             | 1 day (1440 minutes)              |
+| Secret             | `JWT_SECRET` environment variable |
+| Token type         | Bearer                            |
+| Storage (frontend) | `localStorage`                    |
 
 ---
 
@@ -707,12 +711,12 @@ async def list_sessions(
 
 ### CORS Policy
 
-| Setting | Value |
-|---|---|
-| Allowed origins | `ALLOWED_ORIGINS` env variable |
-| Allowed methods | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS` |
-| Allowed headers | `Authorization`, `Content-Type` |
-| Allow credentials | `True` |
+| Setting           | Value                                              |
+| ----------------- | -------------------------------------------------- |
+| Allowed origins   | `ALLOWED_ORIGINS` env variable                     |
+| Allowed methods   | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS` |
+| Allowed headers   | `Authorization`, `Content-Type`                    |
+| Allow credentials | `True`                                             |
 
 ```python
 app.add_middleware(
@@ -769,20 +773,20 @@ For validation errors (Pydantic), FastAPI automatically returns a more detailed 
 
 ### HTTP Status Codes
 
-| Code | Meaning | When used |
-|---|---|---|
-| `200 OK` | Success | Successful GET, PUT, PATCH |
-| `201 Created` | Resource created | Successful POST |
-| `204 No Content` | Resource deleted | Successful DELETE (no body returned) |
-| `400 Bad Request` | Invalid input | Malformed request body |
-| `401 Unauthorized` | Authentication failed | Missing or invalid JWT |
-| `403 Forbidden` | Authorization failed | Valid JWT but wrong user |
-| `404 Not Found` | Resource not found | Document not in MongoDB |
-| `409 Conflict` | Delete blocked | Referenced resource cannot be deleted |
-| `422 Unprocessable Entity` | Validation error | Pydantic validation failure |
-| `500 Internal Server Error` | Unexpected error | Unhandled exceptions |
+| Code                        | Meaning               | When used                             |
+| --------------------------- | --------------------- | ------------------------------------- |
+| `200 OK`                    | Success               | Successful GET, PUT, PATCH            |
+| `201 Created`               | Resource created      | Successful POST                       |
+| `204 No Content`            | Resource deleted      | Successful DELETE (no body returned)  |
+| `400 Bad Request`           | Invalid input         | Malformed request body                |
+| `401 Unauthorized`          | Authentication failed | Missing or invalid JWT                |
+| `403 Forbidden`             | Authorization failed  | Valid JWT but wrong user              |
+| `404 Not Found`             | Resource not found    | Document not in MongoDB               |
+| `409 Conflict`              | Delete blocked        | Referenced resource cannot be deleted |
+| `422 Unprocessable Entity`  | Validation error      | Pydantic validation failure           |
+| `500 Internal Server Error` | Unexpected error      | Unhandled exceptions                  |
 
-> **Note:** DELETE endpoints for workout units and executed sets also return `204 No Content`. The frontend `sessionsStore` reloads the full session after every mutation.
+> **Note:** DELETE endpoints for workout units and executed sets return `204 No Content`. The frontend `sessionsStore` reloads the full session after each delete.
 
 ---
 
@@ -875,11 +879,11 @@ logger.error(f"Unhandled exception: {exc}", exc_info=True)
 
 **Log levels:**
 
-| Level | When |
-|---|---|
-| `INFO` | Successful operations (create, update, delete) |
+| Level     | When                                              |
+| --------- | ------------------------------------------------- |
+| `INFO`    | Successful operations (create, update, delete)    |
 | `WARNING` | Blocked operations (409 conflicts, 404 not found) |
-| `ERROR` | Unhandled exceptions (500 errors) |
+| `ERROR`   | Unhandled exceptions (500 errors)                 |
 
 > During development logs are printed to the console via `uvicorn`. In production the same logs are captured by the Docker container's stdout.
 
@@ -1050,6 +1054,7 @@ motor
 # MyTraining Backend
 
 ## Prerequisites
+
 - Docker Desktop installed
 - MongoDB Atlas account and cluster
 - Git
@@ -1057,40 +1062,51 @@ motor
 ## Getting Started
 
 ### 1. Clone the repository
+
 git clone https://github.com/your-username/mytraining-backend.git
 cd mytraining-backend
 
 ### 2. Configure environment variables
+
 cp .env.example .env
+
 # Edit .env with your Atlas URI, JWT secret, etc.
 
 ### 3. Run with Docker
+
 docker compose up
+
 # The API will be available at http://localhost:8000
+
 # Interactive API docs at http://localhost:8000/docs
 
 ### 4. Stop the app
+
 docker compose down
 
 ## Environment Variables
-| Variable             | Description                        | Example                          |
-|---|---|---|
-| MONGO_URI            | MongoDB Atlas connection string    | mongodb+srv://...                |
-| JWT_SECRET           | Secret key for JWT signing         | a_long_random_string             |
-| JWT_ALGORITHM        | JWT algorithm                      | HS256                            |
-| JWT_EXPIRE_MINUTES   | Token expiry in minutes            | 1440                             |
-| APP_ENV              | Application environment            | development                      |
-| ALLOWED_ORIGINS      | Allowed CORS origins               | http://localhost:4200            |
+
+| Variable           | Description                     | Example               |
+| ------------------ | ------------------------------- | --------------------- |
+| MONGO_URI          | MongoDB Atlas connection string | mongodb+srv://...     |
+| JWT_SECRET         | Secret key for JWT signing      | a_long_random_string  |
+| JWT_ALGORITHM      | JWT algorithm                   | HS256                 |
+| JWT_EXPIRE_MINUTES | Token expiry in minutes         | 1440                  |
+| APP_ENV            | Application environment         | development           |
+| ALLOWED_ORIGINS    | Allowed CORS origins            | http://localhost:4200 |
 
 ## API Documentation
+
 FastAPI automatically generates interactive API docs:
+
 - Swagger UI → http://localhost:8000/docs
-- ReDoc     → http://localhost:8000/redoc
+- ReDoc → http://localhost:8000/redoc
 
 ## Project Structure
+
 See SPEC.md for full architecture and design decisions.
 ```
 
 ---
 
-*Last updated: April 2026*
+_Last updated: April 2026_

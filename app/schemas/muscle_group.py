@@ -1,17 +1,17 @@
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 
 
-class MuscleGroupCreate(BaseModel):
+class MuscleGroupCreate(CamelModel):
     name: str
     description: str | None = None
 
 
-class MuscleGroupUpdate(BaseModel):
+class MuscleGroupUpdate(CamelModel):
     name: str | None = None
     description: str | None = None
 
 
-class MuscleGroupResponse(BaseModel):
+class MuscleGroupResponse(CamelModel):
     id: str
     name: str
     description: str | None = None

@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 from app.schemas.training_type import TrainingTypeResponse
 from app.schemas.muscle_group import MuscleGroupResponse
 
 
-class ExerciseCreate(BaseModel):
+class ExerciseCreate(CamelModel):
     name: str
     training_type_id: str
     muscle_group_id: str
@@ -12,7 +12,7 @@ class ExerciseCreate(BaseModel):
     notes: str | None = None
 
 
-class ExerciseUpdate(BaseModel):
+class ExerciseUpdate(CamelModel):
     name: str | None = None
     training_type_id: str | None = None
     muscle_group_id: str | None = None
@@ -21,7 +21,7 @@ class ExerciseUpdate(BaseModel):
     notes: str | None = None
 
 
-class ExerciseResponse(BaseModel):
+class ExerciseResponse(CamelModel):
     id: str
     name: str
     training_type: TrainingTypeResponse

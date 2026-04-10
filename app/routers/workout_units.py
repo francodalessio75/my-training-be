@@ -7,7 +7,7 @@ from app.models.session import Session, WorkoutUnit
 from app.models.training_type import TrainingType
 from app.models.user import User
 from app.routers._session_helpers import get_user_session, to_session_response
-from app.schemas.common import ReorderRequest
+from app.schemas.common import ReorderRequest, raise_not_found
 from app.schemas.session import SessionResponse
 from app.schemas.workout_unit import WorkoutUnitCreate, WorkoutUnitUpdate
 
@@ -15,12 +15,12 @@ logger = logging.getLogger("mytraining")
 router = APIRouter(tags=["workout-units"])
 
 
-@router.post("/sessions/{session_id}/units", response_model=SessionResponse, status_code=201)
+@router.post("/sessions/{session_id}/units", response_model=SessionResponse, response_model_by_alias=True, status_code=201)
 async def add_unit(session_id: str, body: WorkoutUnitCreate, current_user: User = Depends(get_current_user)):
     session = await get_user_session(session_id, current_user)
     tt = await TrainingType.get(PydanticObjectId(body.training_type_id))
     if tt is None:
-        raise HTTPException(status_code=404, detail="TrainingType not found.")
+        raise_not_found("TrainingType")
 
     unit = WorkoutUnit(
         training_type=tt,
@@ -35,14 +35,14 @@ async def add_unit(session_id: str, body: WorkoutUnitCreate, current_user: User 
     return to_session_response(session)
 
 
-@router.put("/sessions/{session_id}/units/{unit_id}", response_model=SessionResponse)
+@router.put("/sessions/{session_id}/units/{unit_id}", response_model=SessionResponse, response_model_by_alias=True)
 async def update_unit(
     session_id: str, unit_id: str, body: WorkoutUnitUpdate, current_user: User = Depends(get_current_user)
 ):
     session = await get_user_session(session_id, current_user)
     unit = next((u for u in session.workout_units if str(u.id) == unit_id), None)
     if unit is None:
-        raise HTTPException(status_code=404, detail="WorkoutUnit not found.")
+        raise_not_found("WorkoutUnit")
 
     if body.total_load_description is not None:
         unit.total_load_description = body.total_load_description
@@ -51,7 +51,7 @@ async def update_unit(
     if body.training_type_id is not None:
         tt = await TrainingType.get(PydanticObjectId(body.training_type_id))
         if tt is None:
-            raise HTTPException(status_code=404, detail="TrainingType not found.")
+            raise_not_found("TrainingType")
         unit.training_type = tt
 
     session.updated_at = datetime.utcnow()
@@ -73,7 +73,7 @@ async def delete_unit(session_id: str, unit_id: str, current_user: User = Depend
     logger.info(f"WorkoutUnit {unit_id} deleted from Session {session_id}")
 
 
-@router.patch("/sessions/{session_id}/units/reorder", response_model=SessionResponse)
+@router.patch("/sessions/{session_id}/units/reorder", response_model=SessionResponse, response_model_by_alias=True)
 async def reorder_units(
     session_id: str, body: ReorderRequest, current_user: User = Depends(get_current_user)
 ):

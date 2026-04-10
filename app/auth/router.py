@@ -7,22 +7,22 @@ from app.auth.dependencies import get_current_user
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, response_model_by_alias=True)
 async def login(body: LoginRequest):
     user = await User.find_one(User.email == body.email)
-    if user is None or not verify_password(body.password, user.password_hash):
+    if user is None or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token, expires_in = create_access_token(str(user.id))
     return TokenResponse(access_token=token, expires_in=expires_in)
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post("/refresh", response_model=TokenResponse, response_model_by_alias=True)
 async def refresh(current_user: User = Depends(get_current_user)):
     token, expires_in = create_access_token(str(current_user.id))
     return TokenResponse(access_token=token, expires_in=expires_in)
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse, response_model_by_alias=True)
 async def me(current_user: User = Depends(get_current_user)):
     return UserResponse(
         id=str(current_user.id),

@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from app.auth.dependencies import get_current_user
 from app.models.session import Session
 from app.models.user import User
@@ -12,7 +12,7 @@ logger = logging.getLogger("mytraining")
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
-@router.get("", response_model=list[SessionListItemResponse])
+@router.get("", response_model=list[SessionListItemResponse], response_model_by_alias=True)
 async def list_sessions(
     date: datetime | None = None,
     from_: datetime | None = Query(None, alias="from"),
@@ -38,14 +38,14 @@ async def list_sessions(
     return [to_session_list_response(s) for s in sessions]
 
 
-@router.get("/{id}", response_model=SessionResponse)
+@router.get("/{id}", response_model=SessionResponse, response_model_by_alias=True)
 async def get_session(id: str, current_user: User = Depends(get_current_user)):
-    session = await get_user_session(id, current_user)
+    await get_user_session(id, current_user)
     session = await Session.get(PydanticObjectId(id), fetch_links=True)
     return to_session_response(session)
 
 
-@router.post("", response_model=SessionResponse, status_code=201)
+@router.post("", response_model=SessionResponse, response_model_by_alias=True, status_code=201)
 async def create_session(body: SessionCreate, current_user: User = Depends(get_current_user)):
     session = Session(
         user_id=str(current_user.id),
@@ -57,7 +57,7 @@ async def create_session(body: SessionCreate, current_user: User = Depends(get_c
     return to_session_response(session)
 
 
-@router.put("/{id}", response_model=SessionResponse)
+@router.put("/{id}", response_model=SessionResponse, response_model_by_alias=True)
 async def update_session(id: str, body: SessionUpdate, current_user: User = Depends(get_current_user)):
     session = await get_user_session(id, current_user)
     update_data = body.model_dump(exclude_none=True)

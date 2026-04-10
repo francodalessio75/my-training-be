@@ -7,6 +7,7 @@ from app.models.muscle_group import MuscleGroup
 from app.models.session import Session
 from app.models.training_type import TrainingType
 from app.models.user import User
+from app.schemas.common import raise_not_found
 from app.schemas.exercise import ExerciseCreate, ExerciseResponse, ExerciseUpdate
 from app.schemas.muscle_group import MuscleGroupResponse
 from app.schemas.training_type import TrainingTypeResponse
@@ -29,7 +30,7 @@ def to_response(ex: Exercise) -> ExerciseResponse:
     )
 
 
-@router.get("", response_model=list[ExerciseResponse])
+@router.get("", response_model=list[ExerciseResponse], response_model_by_alias=True)
 async def list_exercises(
     trainingTypeId: str | None = None,
     muscleGroupId: str | None = None,
@@ -44,22 +45,22 @@ async def list_exercises(
     return [to_response(ex) for ex in items]
 
 
-@router.get("/{id}", response_model=ExerciseResponse)
+@router.get("/{id}", response_model=ExerciseResponse, response_model_by_alias=True)
 async def get_exercise(id: str, _: User = Depends(get_current_user)):
     ex = await Exercise.get(PydanticObjectId(id), fetch_links=True)
     if ex is None:
-        raise HTTPException(status_code=404, detail="Exercise not found.")
+        raise_not_found("Exercise")
     return to_response(ex)
 
 
-@router.post("", response_model=ExerciseResponse, status_code=201)
+@router.post("", response_model=ExerciseResponse, response_model_by_alias=True, status_code=201)
 async def create_exercise(body: ExerciseCreate, _: User = Depends(get_current_user)):
     tt = await TrainingType.get(PydanticObjectId(body.training_type_id))
     if tt is None:
-        raise HTTPException(status_code=404, detail="TrainingType not found.")
+        raise_not_found("TrainingType")
     mg = await MuscleGroup.get(PydanticObjectId(body.muscle_group_id))
     if mg is None:
-        raise HTTPException(status_code=404, detail="MuscleGroup not found.")
+        raise_not_found("MuscleGroup")
 
     ex = Exercise(
         name=body.name,
@@ -75,11 +76,11 @@ async def create_exercise(body: ExerciseCreate, _: User = Depends(get_current_us
     return to_response(ex)
 
 
-@router.put("/{id}", response_model=ExerciseResponse)
+@router.put("/{id}", response_model=ExerciseResponse, response_model_by_alias=True)
 async def update_exercise(id: str, body: ExerciseUpdate, _: User = Depends(get_current_user)):
     ex = await Exercise.get(PydanticObjectId(id))
     if ex is None:
-        raise HTTPException(status_code=404, detail="Exercise not found.")
+        raise_not_found("Exercise")
 
     if body.name is not None:
         ex.name = body.name
@@ -92,12 +93,12 @@ async def update_exercise(id: str, body: ExerciseUpdate, _: User = Depends(get_c
     if body.training_type_id is not None:
         tt = await TrainingType.get(PydanticObjectId(body.training_type_id))
         if tt is None:
-            raise HTTPException(status_code=404, detail="TrainingType not found.")
+            raise_not_found("TrainingType")
         ex.training_type = tt
     if body.muscle_group_id is not None:
         mg = await MuscleGroup.get(PydanticObjectId(body.muscle_group_id))
         if mg is None:
-            raise HTTPException(status_code=404, detail="MuscleGroup not found.")
+            raise_not_found("MuscleGroup")
         ex.muscle_group = mg
 
     await ex.save()
@@ -110,7 +111,7 @@ async def update_exercise(id: str, body: ExerciseUpdate, _: User = Depends(get_c
 async def delete_exercise(id: str, _: User = Depends(get_current_user)):
     ex = await Exercise.get(PydanticObjectId(id))
     if ex is None:
-        raise HTTPException(status_code=404, detail="Exercise not found.")
+        raise_not_found("Exercise")
 
     ref_sets = await Session.find({"workout_units.executed_sets.exercise.$id": PydanticObjectId(id)}).count()
     if ref_sets > 0:

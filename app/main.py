@@ -57,6 +57,12 @@ app.include_router(workout_units_router, prefix=PREFIX)
 app.include_router(executed_sets_router, prefix=PREFIX)
 
 
+@app.get("/health")
+async def health():
+    collections = await db.list_collection_names()
+    return {"status": "ok", "collections": collections}
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {exc}", exc_info=True)

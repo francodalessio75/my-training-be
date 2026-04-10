@@ -5,7 +5,7 @@ class User(Document):
     email: str
     display_name: str
     description: str | None = None
-    password_hash: str
+    hashed_password: str
 
     class Settings:
         name = "users"

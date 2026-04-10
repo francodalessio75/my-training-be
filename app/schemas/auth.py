@@ -1,18 +1,18 @@
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(CamelModel):
     email: str
     password: str
 
 
-class TokenResponse(BaseModel):
+class TokenResponse(CamelModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
 
 
-class UserResponse(BaseModel):
+class UserResponse(CamelModel):
     id: str
     email: str
     display_name: str

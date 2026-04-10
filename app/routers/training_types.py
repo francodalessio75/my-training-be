@@ -6,6 +6,7 @@ from app.models.exercise import Exercise
 from app.models.session import Session
 from app.models.training_type import TrainingType
 from app.models.user import User
+from app.schemas.common import raise_not_found
 from app.schemas.training_type import TrainingTypeCreate, TrainingTypeResponse, TrainingTypeUpdate
 
 logger = logging.getLogger("mytraining")
@@ -16,12 +17,12 @@ def to_response(tt: TrainingType) -> TrainingTypeResponse:
     return TrainingTypeResponse(id=str(tt.id), name=tt.name, description=tt.description)
 
 
-@router.get("", response_model=list[TrainingTypeResponse])
+@router.get("", response_model=list[TrainingTypeResponse], response_model_by_alias=True)
 async def list_training_types(_: User = Depends(get_current_user)):
     return [to_response(tt) for tt in await TrainingType.find_all().to_list()]
 
 
-@router.post("", response_model=TrainingTypeResponse, status_code=201)
+@router.post("", response_model=TrainingTypeResponse, response_model_by_alias=True, status_code=201)
 async def create_training_type(body: TrainingTypeCreate, _: User = Depends(get_current_user)):
     tt = TrainingType(**body.model_dump())
     await tt.insert()
@@ -29,11 +30,11 @@ async def create_training_type(body: TrainingTypeCreate, _: User = Depends(get_c
     return to_response(tt)
 
 
-@router.put("/{id}", response_model=TrainingTypeResponse)
+@router.put("/{id}", response_model=TrainingTypeResponse, response_model_by_alias=True)
 async def update_training_type(id: str, body: TrainingTypeUpdate, _: User = Depends(get_current_user)):
     tt = await TrainingType.get(PydanticObjectId(id))
     if tt is None:
-        raise HTTPException(status_code=404, detail="TrainingType not found.")
+        raise_not_found("TrainingType")
     update_data = body.model_dump(exclude_none=True)
     if update_data:
         await tt.set(update_data)
@@ -45,7 +46,7 @@ async def update_training_type(id: str, body: TrainingTypeUpdate, _: User = Depe
 async def delete_training_type(id: str, _: User = Depends(get_current_user)):
     tt = await TrainingType.get(PydanticObjectId(id))
     if tt is None:
-        raise HTTPException(status_code=404, detail="TrainingType not found.")
+        raise_not_found("TrainingType")
 
     ref_exercises = await Exercise.find({"training_type.$id": PydanticObjectId(id)}).count()
     ref_sessions = await Session.find({"workout_units.training_type.$id": PydanticObjectId(id)}).count()

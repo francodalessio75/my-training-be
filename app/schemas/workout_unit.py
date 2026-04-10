@@ -1,21 +1,21 @@
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 from app.schemas.training_type import TrainingTypeResponse
 from app.schemas.executed_set import ExecutedSetResponse
 
 
-class WorkoutUnitCreate(BaseModel):
+class WorkoutUnitCreate(CamelModel):
     training_type_id: str
     total_load_description: str
     notes: str | None = None
 
 
-class WorkoutUnitUpdate(BaseModel):
+class WorkoutUnitUpdate(CamelModel):
     training_type_id: str | None = None
     total_load_description: str | None = None
     notes: str | None = None
 
 
-class WorkoutUnitResponse(BaseModel):
+class WorkoutUnitResponse(CamelModel):
     id: str
     training_type: TrainingTypeResponse
     executed_sets: list[ExecutedSetResponse]
@@ -23,6 +23,6 @@ class WorkoutUnitResponse(BaseModel):
     notes: str | None = None
 
 
-class WorkoutUnitSummaryResponse(BaseModel):
+class WorkoutUnitSummaryResponse(CamelModel):
     id: str
     training_type: TrainingTypeResponse

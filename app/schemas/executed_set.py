@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from app.schemas.common import CamelModel
 from app.schemas.exercise import ExerciseResponse
 
 
-class ExecutedSetCreate(BaseModel):
+class ExecutedSetCreate(CamelModel):
     exercise_id: str
     load: float
     load_description: str
@@ -10,7 +10,7 @@ class ExecutedSetCreate(BaseModel):
     notes: str | None = None
 
 
-class ExecutedSetUpdate(BaseModel):
+class ExecutedSetUpdate(CamelModel):
     exercise_id: str | None = None
     load: float | None = None
     load_description: str | None = None
@@ -18,7 +18,7 @@ class ExecutedSetUpdate(BaseModel):
     notes: str | None = None
 
 
-class ExecutedSetResponse(BaseModel):
+class ExecutedSetResponse(CamelModel):
     id: str
     exercise: ExerciseResponse
     load: float
